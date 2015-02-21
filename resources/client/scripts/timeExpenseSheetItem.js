@@ -226,7 +226,7 @@ xtte.timeExpenseSheetItem.getPrice = function()
     var qry = toolbox.executeDbQuery("timeexpensesheetitem", "getterate", params);
     if (qry.first())
     {
-      _rate.setBaseValue(qry.value("rate"));
+      _rate.setLocalValue(qry.value("rate"));
       _rate.enabled = true;
     }
     else
@@ -244,7 +244,7 @@ xtte.timeExpenseSheetItem.populate = function()
   var params = new Object();
   params.teitem_id = _teitemid;
 
-  qry = toolbox.executeDbQuery("timeexpensesheetitem","detail", params);
+  var qry = toolbox.executeDbQuery("timeexpensesheetitem","detail", params);
   if (qry.first())
   {
     if (_mode == xtte.newMode)
@@ -746,7 +746,7 @@ xtte.timeExpenseSheetItem.testCurrEmpId = function()
 {
   var params = new Object;
   params.emp_id = _employee.id();
-  qry = toolbox.executeQuery("SELECT crmacct_emp_id = <? value('emp_id') ?>::integer AS test "
+  var qry = toolbox.executeQuery("SELECT crmacct_emp_id = <? value('emp_id') ?>::integer AS test "
                      + "FROM  crmacct "
                      + "WHERE crmacct_usr_username = getEffectiveXtUser();", params);
   if (qry.first()) {
@@ -777,7 +777,9 @@ _next.enabled = false;
 _type.append(1, qsTr("Time"), "T");
 _type.append(2, qsTr("Expense"), "E");
 
-_items.setQuery(xtte.itemSql);
+//_items.setQuery(xtte.itemSql);
+_items.addExtraClause("(item_type='R') AND "
+                    + "(item_id IN (SELECT teexp_id FROM te.teexp))");
 
 _project.setAllowedStatuses(0x02); // In process
 
